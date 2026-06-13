@@ -9,3 +9,6 @@ Thumbs.db
 
 # Node (kdyby přibyl build)
 node_modules/
+
+# Dočasné náhledy z proklikání (testy)
+walk/
