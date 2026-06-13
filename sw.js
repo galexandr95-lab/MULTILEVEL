@@ -1,5 +1,5 @@
 // Multilevel Doprava — service worker (offline cache)
-const CACHE = 'multilevel-v1';
+const CACHE = 'multilevel-v2';
 
 // Lokální soubory, které se uloží pro offline provoz.
 const ASSETS = [
@@ -40,6 +40,21 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return; // cizí zdroje neřešíme
 
+  // HTML / navigace → nejdřív síť (vždy čerstvá appka), offline fallback na cache
+  if (request.mode === 'navigate' || request.destination === 'document') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => {});
+          return response;
+        })
+        .catch(() => caches.match(request).then((c) => c || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // ostatní soubory (ikony, manifest) → nejdřív cache, pak síť
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;

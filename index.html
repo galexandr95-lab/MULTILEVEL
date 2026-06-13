@@ -642,8 +642,11 @@
       <div class="route-dot dot-to"></div>
       <input class="city-input" id="city-to" type="text" placeholder="Kam (např. Ostrava)" autocomplete="off">
     </div>
-    <button class="maps-btn" onclick="openMaps()">
-      🗺 Ověřit km v Google Maps
+    <button class="maps-btn" id="calc-km-btn" onclick="calcDistance()" style="background:rgba(232,197,71,0.16);border-color:rgba(232,197,71,0.45);color:var(--accent);font-weight:600">
+      📐 Spočítat km z trasy
+    </button>
+    <button class="maps-btn" onclick="openMaps()" style="margin-top:8px">
+      🗺 Ověřit v Google Maps
     </button>
   </div>
 
@@ -884,6 +887,44 @@ function openMaps() {
   const q = from && to ? `${from} to ${to}` : (from || to);
   const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`;
   window.open(url, '_blank');
+}
+
+// ── AUTOMATICKÝ VÝPOČET KM (OpenStreetMap + OSRM, zdarma, bez API klíče) ──
+async function geocodeCity(q) {
+  const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=cs&q=' + encodeURIComponent(q);
+  const res = await fetch(url, { headers: { Accept: 'application/json' } });
+  if (!res.ok) throw new Error('geokódování selhalo');
+  const data = await res.json();
+  if (!data.length) throw new Error('místo „' + q + '" nenalezeno');
+  return { lat: data[0].lat, lon: data[0].lon };
+}
+
+async function calcDistance() {
+  const from = document.getElementById('city-from').value.trim();
+  const to = document.getElementById('city-to').value.trim();
+  if (!from || !to) { alert('Zadej nejdřív odkud a kam.'); return; }
+  const btn = document.getElementById('calc-km-btn');
+  if (!btn.dataset.label) btn.dataset.label = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Počítám vzdálenost…';
+  try {
+    const [a, b] = await Promise.all([geocodeCity(from), geocodeCity(to)]);
+    const route = `https://router.project-osrm.org/route/v1/driving/${a.lon},${a.lat};${b.lon},${b.lat}?overview=false`;
+    const res = await fetch(route);
+    if (!res.ok) throw new Error('výpočet trasy selhal');
+    const j = await res.json();
+    if (!j.routes || !j.routes.length) throw new Error('trasa nenalezena');
+    const km = Math.round(j.routes[0].distance / 1000);
+    document.getElementById('km-field').value = km;
+    syncSlider();
+    btn.innerHTML = '✓ ' + km + ' km (' + from + ' → ' + to + ')';
+    setTimeout(() => { btn.innerHTML = btn.dataset.label; }, 3500);
+  } catch (e) {
+    btn.innerHTML = btn.dataset.label;
+    alert('Automatický výpočet km se nepovedl: ' + e.message + '.\n\nZadej km ručně, nebo použij „Ověřit v Google Maps".');
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ── SAZBY ──
