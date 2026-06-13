@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Multilevel">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0d05a"/>
+      <stop offset="1" stop-color="#d9a520"/>
+    </linearGradient>
+  </defs>
+
+  <!-- pozadí -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- nákladní auto (plachtová doprava) -->
+  <g fill="#16130c">
+    <!-- ložná plocha / plachta -->
+    <rect x="104" y="192" width="196" height="150" rx="12"/>
+    <!-- kabina se skloněnou kapotou -->
+    <path d="M300 244 L366 244 Q380 244 388 258 L406 300 L406 342 L300 342 Z"/>
+  </g>
+
+  <!-- pleti plachty -->
+  <g stroke="#f0d05a" stroke-width="6" opacity="0.30" stroke-linecap="round">
+    <line x1="140" y1="210" x2="140" y2="324"/>
+    <line x1="178" y1="210" x2="178" y2="324"/>
+    <line x1="216" y1="210" x2="216" y2="324"/>
+    <line x1="254" y1="210" x2="254" y2="324"/>
+  </g>
+
+  <!-- okno kabiny -->
+  <path d="M314 258 L364 258 L374 292 L314 292 Z" fill="#f0d05a" opacity="0.85"/>
+
+  <!-- kola -->
+  <g>
+    <circle cx="170" cy="350" r="36" fill="#16130c"/>
+    <circle cx="170" cy="350" r="15" fill="#f0d05a"/>
+    <circle cx="356" cy="350" r="36" fill="#16130c"/>
+    <circle cx="356" cy="350" r="15" fill="#f0d05a"/>
+  </g>
+</svg>
